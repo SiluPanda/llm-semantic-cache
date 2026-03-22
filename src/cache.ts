@@ -50,12 +50,14 @@ export async function createCache(options: SemanticCacheOptions): Promise<Semant
     wrap<T extends object>(client: T): T {
       return new Proxy(client, {
         get(target, prop) {
-          const val = (target as Record<string | symbol, unknown>)[prop as string]
-          if (typeof val !== 'object' || val === null) return val
+          const val = (target as Record<string | symbol, unknown>)[prop]
+          // Only intercept the `chat` property; pass everything else through unchanged
+          if (prop !== 'chat' || typeof val !== 'object' || val === null) return val
           return new Proxy(val as object, {
             get(t2, p2) {
-              const v2 = (t2 as Record<string | symbol, unknown>)[p2 as string]
-              if (typeof v2 !== 'object' || v2 === null) return v2
+              const v2 = (t2 as Record<string | symbol, unknown>)[p2]
+              // Only intercept the `completions` property; pass everything else through unchanged
+              if (p2 !== 'completions' || typeof v2 !== 'object' || v2 === null) return v2
               return new Proxy(v2 as object, {
                 get(t3, p3) {
                   if (p3 === 'create') {
@@ -84,7 +86,7 @@ export async function createCache(options: SemanticCacheOptions): Promise<Semant
                       return result
                     }
                   }
-                  return (t3 as Record<string | symbol, unknown>)[p3 as string]
+                  return (t3 as Record<string | symbol, unknown>)[p3]
                 },
               })
             },
