@@ -12,13 +12,13 @@ This file tracks all implementation tasks derived from SPEC.md. Tasks are groupe
 
 - [ ] **Define all TypeScript types** — Create `src/types.ts` with all type definitions: `EmbedderFn`, `PromptInput`, `SemanticCacheOptions`, `CacheEntry`, `CacheHit`, `GetOptions`, `SetOptions`, `WrapOptions`, `SearchOptions`, `SearchResult`, `CacheStats`, `StorageBackend` interface, eviction policy types, HNSW options, and model price types. | Status: not_done
 
-- [ ] **Set up public API exports** — Update `src/index.ts` to export `createCache`, all public types from `types.ts`, and the `SemanticCache` class. | Status: not_done
+- [x] **Set up public API exports** — Update `src/index.ts` to export `createCache`, all public types from `types.ts`, and the `SemanticCache` class. | Status: done
 
 ---
 
 ## Phase 2: Core Math — Similarity and Vector Operations
 
-- [ ] **Implement cosine similarity function** — Create `src/similarity.ts` with a `cosineSimilarity(a: Float32Array, b: Float32Array): number` function that computes the dot product of two vectors. For pre-normalized vectors, the dot product equals cosine similarity. Include the full formula with L2 norm computation as a fallback for non-normalized vectors. | Status: not_done
+- [x] **Implement cosine similarity function** — Create `src/similarity.ts` with a `cosineSimilarity(a: Float32Array, b: Float32Array): number` function that computes the dot product of two vectors. For pre-normalized vectors, the dot product equals cosine similarity. Include the full formula with L2 norm computation as a fallback for non-normalized vectors. | Status: done
 
 - [ ] **Implement vector normalization** — In `src/similarity.ts`, add `normalizeVector(v: number[]): Float32Array` that L2-normalizes a vector to unit length. Detect already-normalized vectors (L2 norm within epsilon of 1.0) and skip normalization. Handle zero vector gracefully (return zero Float32Array). | Status: not_done
 
@@ -32,7 +32,7 @@ This file tracks all implementation tasks derived from SPEC.md. Tasks are groupe
 
 - [ ] **Implement prompt normalization and serialization** — Create `src/prompt.ts` with a `serializePrompt(input: PromptInput): string` function that converts all supported prompt formats to a canonical string. Handle: plain string passthrough, OpenAI-style message arrays (concatenate role-prefixed content), Anthropic-style objects with system and messages fields (prepend system message). | Status: not_done
 
-- [ ] **Support optional normalizer function** — In `src/prompt.ts`, add support for an optional `normalizer` function that is applied to the serialized prompt string before embedding (e.g., `prompt-dedup` normalize). | Status: not_done
+- [x] **Support optional normalizer function** — In `src/prompt.ts`, add support for an optional `normalizer` function that is applied to the serialized prompt string before embedding (e.g., `prompt-dedup` normalize). | Status: done
 
 - [ ] **Write prompt.test.ts** — Create `src/__tests__/prompt.test.ts`. Test cases: plain string passthrough, OpenAI message array serialization, Anthropic format serialization, system message prepending, empty messages array, single user message, multi-turn conversation serialization, normalizer function is applied when provided. | Status: not_done
 
@@ -40,9 +40,9 @@ This file tracks all implementation tasks derived from SPEC.md. Tasks are groupe
 
 ## Phase 4: Search Strategies
 
-- [ ] **Implement brute-force nearest-neighbor search** — Create `src/search/brute-force.ts` with a function that takes a query embedding (Float32Array), a packed vectors matrix (Float32Array), corresponding entry IDs (string[]), dimensions (number), and returns the best match (id, similarity score) or null if no entries exist. Iterate all vectors computing cosine similarity, track the maximum. | Status: not_done
+- [x] **Implement brute-force nearest-neighbor search** — Create `src/search/brute-force.ts` with a function that takes a query embedding (Float32Array), a packed vectors matrix (Float32Array), corresponding entry IDs (string[]), dimensions (number), and returns the best match (id, similarity score) or null if no entries exist. Iterate all vectors computing cosine similarity, track the maximum. | Status: done
 
-- [ ] **Implement top-K brute-force search** — Extend brute-force search to support returning top-K results with their similarity scores, sorted descending by similarity. Support an optional `minSimilarity` floor. | Status: not_done
+- [x] **Implement top-K brute-force search** — Extend brute-force search to support returning top-K results with their similarity scores, sorted descending by similarity. Support an optional `minSimilarity` floor. | Status: done
 
 - [ ] **Write search.test.ts** — Create `src/__tests__/search.test.ts`. Test cases: empty vectors returns null, single entry returns it with correct similarity, multiple entries returns the best match, top-K returns correct number of results sorted by similarity, minSimilarity filters out low-similarity results, large entry sets (1000+) return correct results. | Status: not_done
 
@@ -54,7 +54,7 @@ This file tracks all implementation tasks derived from SPEC.md. Tasks are groupe
 
 - [ ] **Implement in-memory storage backend** — Create `src/storage/memory.ts` implementing `StorageBackend`. Use a `Map<string, CacheEntry>` for entry storage. Maintain a packed `Float32Array` matrix per model namespace for vector storage. Implement `getVectors` to return the pre-packed matrix for zero-copy search. | Status: not_done
 
-- [ ] **Implement LRU tracking in memory backend** — Add a doubly-linked list to the in-memory backend for LRU eviction. On cache hit (via `get`), promote the entry to the head. On eviction, remove from the tail. O(1) promotion and eviction. | Status: not_done
+- [x] **Implement LRU tracking in memory backend** — Add a doubly-linked list to the in-memory backend for LRU eviction. On cache hit (via `get`), promote the entry to the head. On eviction, remove from the tail. O(1) promotion and eviction. | Status: done
 
 - [ ] **Implement storage factory** — Create a factory function (in `src/storage/` or `src/cache.ts`) that takes the `storage` option from `SemanticCacheOptions` and returns the appropriate `StorageBackend` instance. Handle string `'memory'`, object `{ type: 'memory' }`, object `{ type: 'sqlite', ... }`, object `{ type: 'redis', ... }`, object `{ type: 'filesystem', ... }`, and custom `StorageBackend` instances. | Status: not_done
 
@@ -64,11 +64,11 @@ This file tracks all implementation tasks derived from SPEC.md. Tasks are groupe
 
 ## Phase 6: Eviction Policies
 
-- [ ] **Implement TTL eviction** — Create `src/eviction.ts` with TTL checking logic. On cache get, check if `entry.createdAt + entry.ttl < Date.now()` (using per-entry TTL or global TTL). Return null and schedule deletion for expired entries. Support lazy eviction (check on access) and optional background sweep. | Status: not_done
+- [x] **Implement TTL eviction** — Create `src/eviction.ts` with TTL checking logic. On cache get, check if `entry.createdAt + entry.ttl < Date.now()` (using per-entry TTL or global TTL). Return null and schedule deletion for expired entries. Support lazy eviction (check on access) and optional background sweep. | Status: done
 
-- [ ] **Implement LRU eviction** — In `src/eviction.ts`, add LRU eviction logic. When a new entry is added and `maxEntries` is reached, identify and remove the least recently accessed entry (lowest `accessedAt`). Delegate actual removal to the storage backend. | Status: not_done
+- [x] **Implement LRU eviction** — In `src/eviction.ts`, add LRU eviction logic. When a new entry is added and `maxEntries` is reached, identify and remove the least recently accessed entry (lowest `accessedAt`). Delegate actual removal to the storage backend. | Status: done
 
-- [ ] **Implement combined TTL + LRU eviction** — Ensure TTL and LRU policies can be combined. An entry is evicted if either condition is met: TTL expired, or size limit reached (LRU). Both conditions are checked on access. | Status: not_done
+- [x] **Implement combined TTL + LRU eviction** — Ensure TTL and LRU policies can be combined. An entry is evicted if either condition is met: TTL expired, or size limit reached (LRU). Both conditions are checked on access. | Status: done
 
 - [ ] **Write eviction.test.ts** — Create `src/__tests__/eviction.test.ts`. Test cases: TTL expiry removes entry after duration, per-entry TTL overrides global TTL, LRU eviction removes least recently accessed when max reached, combined TTL+LRU works correctly, accessing an entry updates its accessedAt for LRU, TTL boundary condition (exactly at expiry time). | Status: not_done
 
@@ -78,27 +78,27 @@ This file tracks all implementation tasks derived from SPEC.md. Tasks are groupe
 
 - [ ] **Implement SemanticCache class** — Create `src/cache.ts` with the `SemanticCache` class. Constructor accepts `SemanticCacheOptions`, validates required `embedder` option (throw if missing), initializes storage backend, sets defaults for threshold (0.92), eviction policy, search strategy. | Status: not_done
 
-- [ ] **Implement createCache factory** — In `src/cache.ts`, export `createCache(options: SemanticCacheOptions): SemanticCache` factory function that constructs and returns a `SemanticCache` instance. | Status: not_done
+- [x] **Implement createCache factory** — In `src/cache.ts`, export `createCache(options: SemanticCacheOptions): SemanticCache` factory function that constructs and returns a `SemanticCache` instance. | Status: done
 
-- [ ] **Implement cache.get()** — Implement `get(prompt: PromptInput, options?: GetOptions): Promise<CacheHit | null>`. Steps: serialize prompt, apply normalizer, call embedder, normalize vector, determine model namespace (default or from options), search storage for nearest neighbor, evaluate threshold (use per-call threshold override if provided), on hit update accessedAt/hitCount/stats, on miss increment miss counter. Check TTL on the matched entry. | Status: not_done
+- [x] **Implement cache.get()** — Implement `get(prompt: PromptInput, options?: GetOptions): Promise<CacheHit | null>`. Steps: serialize prompt, apply normalizer, call embedder, normalize vector, determine model namespace (default or from options), search storage for nearest neighbor, evaluate threshold (use per-call threshold override if provided), on hit update accessedAt/hitCount/stats, on miss increment miss counter. Check TTL on the matched entry. | Status: done
 
-- [ ] **Implement cache.set()** — Implement `set(prompt: PromptInput, response: string, options?: SetOptions): Promise<string>`. Steps: serialize prompt, call embedder, normalize vector, validate dimensionality against existing entries in namespace, generate UUID for entry ID, create CacheEntry with all fields, enforce maxEntries eviction, store in backend, return entry ID. | Status: not_done
+- [x] **Implement cache.set()** — Implement `set(prompt: PromptInput, response: string, options?: SetOptions): Promise<string>`. Steps: serialize prompt, call embedder, normalize vector, validate dimensionality against existing entries in namespace, generate UUID for entry ID, create CacheEntry with all fields, enforce maxEntries eviction, store in backend, return entry ID. | Status: done
 
-- [ ] **Implement cache.search()** — Implement `search(prompt: PromptInput, options?: SearchOptions): Promise<SearchResult[]>`. Steps: serialize and embed the prompt, search the specified model namespace using top-K brute-force (or HNSW), filter by minSimilarity, return results sorted descending by similarity. | Status: not_done
+- [x] **Implement cache.search()** — Implement `search(prompt: PromptInput, options?: SearchOptions): Promise<SearchResult[]>`. Steps: serialize and embed the prompt, search the specified model namespace using top-K brute-force (or HNSW), filter by minSimilarity, return results sorted descending by similarity. | Status: done
 
-- [ ] **Implement cache.delete()** — Implement `delete(id: string): Promise<boolean>`. Delegate to storage backend. Return true if entry existed and was deleted. | Status: not_done
+- [x] **Implement cache.delete()** — Implement `delete(id: string): Promise<boolean>`. Delegate to storage backend. Return true if entry existed and was deleted. | Status: done
 
-- [ ] **Implement cache.clear()** — Implement `clear(options?: { model?: string }): Promise<void>`. Clear all entries, or only entries matching the specified model. Delegate to storage backend. Reset relevant stats if clearing all. | Status: not_done
+- [x] **Implement cache.clear()** — Implement `clear(options?: { model?: string }): Promise<void>`. Clear all entries, or only entries matching the specified model. Delegate to storage backend. Reset relevant stats if clearing all. | Status: done
 
 - [ ] **Implement cache.close()** — Implement `close(): Promise<void>`. Flush any pending writes via storage backend's `flush()`, then close connections via `close()`. | Status: not_done
 
-- [ ] **Implement model-aware namespacing** — Ensure all cache operations (get, set, search, clear, stats) scope entries by model identifier. Model identifiers are normalized to lowercase by default. Support custom `modelNormalizer` function. | Status: not_done
+- [x] **Implement model-aware namespacing** — Ensure all cache operations (get, set, search, clear, stats) scope entries by model identifier. Model identifiers are normalized to lowercase by default. Support custom `modelNormalizer` function. | Status: done
 
 - [ ] **Implement model identifier normalization** — Normalize model strings to lowercase. Preserve version suffixes (e.g., `gpt-4o-2024-08-06` stays as-is after lowercasing). Support custom `modelNormalizer` function for version-agnostic caching. | Status: not_done
 
-- [ ] **Implement default model handling** — When `model` is not specified in `get`/`set`/`search` options, use a default namespace (e.g., `'default'`). Document this behavior. | Status: not_done
+- [x] **Implement default model handling** — When `model` is not specified in `get`/`set`/`search` options, use a default namespace (e.g., `'default'`). Document this behavior. | Status: done
 
-- [ ] **Write cache.test.ts** — Create `src/__tests__/cache.test.ts`. Test cases: createCache with valid options succeeds, createCache without embedder throws, cache.get on empty cache returns null, cache.set stores entry and returns ID, cache.get finds semantically similar entry (cache hit), cache.get returns null for dissimilar entry (cache miss), threshold boundary conditions (at threshold = hit, below threshold = miss), per-call threshold override works, model namespacing isolates entries, cache.delete removes entry, cache.clear removes all entries, cache.clear with model filter removes only matching entries, cache.close flushes and closes, multiple set/get operations maintain consistency. | Status: not_done
+- [x] **Write cache.test.ts** — Create `src/__tests__/cache.test.ts`. Test cases: createCache with valid options succeeds, createCache without embedder throws, cache.get on empty cache returns null, cache.set stores entry and returns ID, cache.get finds semantically similar entry (cache hit), cache.get returns null for dissimilar entry (cache miss), threshold boundary conditions (at threshold = hit, below threshold = miss), per-call threshold override works, model namespacing isolates entries, cache.delete removes entry, cache.clear removes all entries, cache.clear with model filter removes only matching entries, cache.close flushes and closes, multiple set/get operations maintain consistency. | Status: done
 
 ---
 
@@ -106,13 +106,13 @@ This file tracks all implementation tasks derived from SPEC.md. Tasks are groupe
 
 - [ ] **Implement stats tracking** — Create `src/stats.ts` with a `CacheStatsTracker` class that maintains running counters: hits, misses, tokensSaved, costSaved, totalSimilarity (for computing average), per-model breakdowns. Provide methods: `recordHit(entry, model)`, `recordMiss(model)`, `getStats(options?)`, `resetStats()`. | Status: not_done
 
-- [ ] **Implement token estimation** — In `src/stats.ts`, add a default token estimator: `text.length / 4` (configurable via `tokenEstimator` option). Use this to estimate tokens saved per cache hit. | Status: not_done
+- [x] **Implement token estimation** — In `src/stats.ts`, add a default token estimator: `text.length / 4` (configurable via `tokenEstimator` option). Use this to estimate tokens saved per cache hit. | Status: done
 
-- [ ] **Implement cost calculation** — In `src/stats.ts`, compute cost saved per hit using model prices: `(promptTokens / 1M * input_price) + (responseTokens / 1M * output_price)`. Use built-in default prices for common models. Fall back to `{ input: 1.00, output: 2.00 }` for unknown models. Support `modelPrices` option override. | Status: not_done
+- [x] **Implement cost calculation** — In `src/stats.ts`, compute cost saved per hit using model prices: `(promptTokens / 1M * input_price) + (responseTokens / 1M * output_price)`. Use built-in default prices for common models. Fall back to `{ input: 1.00, output: 2.00 }` for unknown models. Support `modelPrices` option override. | Status: done
 
 - [ ] **Add built-in model prices** — In `src/stats.ts`, define built-in prices for: gpt-4o, gpt-4o-mini, gpt-4-turbo, gpt-3.5-turbo, claude-sonnet-4-20250514, claude-3-5-sonnet-20241022, claude-3-haiku-20240307. Match the values from the spec. | Status: not_done
 
-- [ ] **Implement cache.stats()** — Wire up `cache.stats(options?: { model?: string }): Promise<CacheStats>` to return the current stats. Include: hits, misses, hitRate, entries count (from storage.size()), tokensSaved, costSaved, models list, avgSimilarity, entriesByModel. Support model-scoped stats. | Status: not_done
+- [x] **Implement cache.stats()** — Wire up `cache.stats(options?: { model?: string }): Promise<CacheStats>` to return the current stats. Include: hits, misses, hitRate, entries count (from storage.size()), tokensSaved, costSaved, models list, avgSimilarity, entriesByModel. Support model-scoped stats. | Status: done
 
 - [ ] **Implement cache.resetStats()** — Wire up `cache.resetStats()` to reset all counters without clearing cache entries. | Status: not_done
 
@@ -122,9 +122,9 @@ This file tracks all implementation tasks derived from SPEC.md. Tasks are groupe
 
 ## Phase 9: Cache-Through Wrapper
 
-- [ ] **Implement Proxy-based wrapper** — Create `src/wrapper/wrap.ts` with the `wrap<T>(client: T, options?: WrapOptions): T` method. Use JavaScript `Proxy` to intercept method calls. Detect client type (OpenAI vs Anthropic) automatically or via `clientType` option. Delegate to appropriate adapter. | Status: not_done
+- [x] **Implement Proxy-based wrapper** — Create `src/wrapper/wrap.ts` with the `wrap<T>(client: T, options?: WrapOptions): T` method. Use JavaScript `Proxy` to intercept method calls. Detect client type (OpenAI vs Anthropic) automatically or via `clientType` option. Delegate to appropriate adapter. | Status: done
 
-- [ ] **Implement OpenAI client adapter** — Create `src/wrapper/openai.ts`. Intercept `client.chat.completions.create(params)`. Extract prompt from `params.messages`, extract model from `params.model`. On cache hit, reconstruct OpenAI `ChatCompletion` response format with synthetic `id` (prefixed `cache-`), `usage` zeroed out, and `_cached: true`. On cache miss, call original method, cache the response, return it. | Status: not_done
+- [x] **Implement OpenAI client adapter** — Create `src/wrapper/openai.ts`. Intercept `client.chat.completions.create(params)`. Extract prompt from `params.messages`, extract model from `params.model`. On cache hit, reconstruct OpenAI `ChatCompletion` response format with synthetic `id` (prefixed `cache-`), `usage` zeroed out, and `_cached: true`. On cache miss, call original method, cache the response, return it. | Status: done
 
 - [ ] **Implement Anthropic client adapter** — Create `src/wrapper/anthropic.ts`. Intercept `client.messages.create(params)`. Extract prompt from `params.messages` and `params.system`, extract model from `params.model`. On cache hit, reconstruct Anthropic `Message` response format. On cache miss, call original method, cache the response, return it. | Status: not_done
 
@@ -298,9 +298,9 @@ This file tracks all implementation tasks derived from SPEC.md. Tasks are groupe
 
 ## Phase 22: Build, Lint, and CI
 
-- [ ] **Verify TypeScript compilation** — Ensure `npm run build` (tsc) compiles the entire project without errors. Verify declaration files are generated in `dist/`. Verify source maps are generated. | Status: not_done
+- [x] **Verify TypeScript compilation** — Ensure `npm run build` (tsc) compiles the entire project without errors. Verify declaration files are generated in `dist/`. Verify source maps are generated. | Status: done
 
-- [ ] **Configure ESLint** — Set up ESLint configuration for the project (eslintrc or flat config). Ensure `npm run lint` runs and passes on all source files. | Status: not_done
+- [x] **Configure ESLint** — Set up ESLint configuration for the project (eslintrc or flat config). Ensure `npm run lint` runs and passes on all source files. | Status: done
 
 - [ ] **Verify all tests pass** — Run `npm run test` (vitest) and ensure all unit, integration, and edge case tests pass. | Status: not_done
 
@@ -310,9 +310,9 @@ This file tracks all implementation tasks derived from SPEC.md. Tasks are groupe
 
 ## Phase 23: Final Integration Testing
 
-- [ ] **End-to-end cache hit flow** — Test the complete flow: create cache with mock embedder -> set entry -> get with semantically similar prompt -> verify hit with correct response, similarity score, and entry ID. | Status: not_done
+- [x] **End-to-end cache hit flow** — Test the complete flow: create cache with mock embedder -> set entry -> get with semantically similar prompt -> verify hit with correct response, similarity score, and entry ID. | Status: done
 
-- [ ] **End-to-end cache miss flow** — Test: create cache -> get with unrelated prompt -> verify null return and miss counter incremented. | Status: not_done
+- [x] **End-to-end cache miss flow** — Test: create cache -> get with unrelated prompt -> verify null return and miss counter incremented. | Status: done
 
 - [ ] **End-to-end cache-through wrapper flow (OpenAI)** — Test: create cache -> wrap mock OpenAI client -> call chat.completions.create -> verify first call delegates to client -> call with similar prompt -> verify second call returns from cache without calling client. | Status: not_done
 
@@ -326,8 +326,8 @@ This file tracks all implementation tasks derived from SPEC.md. Tasks are groupe
 
 - [ ] **End-to-end serialization round-trip** — Test: create cache -> add entries with various models and metadata -> serialize -> deserialize -> verify all entries restored with correct embeddings, responses, and metadata. | Status: not_done
 
-- [ ] **End-to-end eviction** — Test: create cache with maxEntries:3 -> add 4 entries -> verify oldest is evicted and only 3 remain. | Status: not_done
+- [x] **End-to-end eviction** — Test: create cache with maxEntries:3 -> add 4 entries -> verify oldest is evicted and only 3 remain. | Status: done
 
-- [ ] **End-to-end TTL expiry** — Test: create cache with TTL:100ms -> set entry -> wait 150ms -> verify get returns null (miss). | Status: not_done
+- [x] **End-to-end TTL expiry** — Test: create cache with TTL:100ms -> set entry -> wait 150ms -> verify get returns null (miss). | Status: done
 
-- [ ] **End-to-end cost tracking** — Test: create cache with model prices -> perform hits and misses -> verify stats report correct tokensSaved and costSaved values. | Status: not_done
+- [x] **End-to-end cost tracking** — Test: create cache with model prices -> perform hits and misses -> verify stats report correct tokensSaved and costSaved values. | Status: done
