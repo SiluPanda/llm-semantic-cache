@@ -149,4 +149,69 @@ describe('SemanticCache', () => {
     const hit = await ttlCache.get('ttl prompt')
     expect(hit).toBeNull()
   })
+
+  it('wrap(): returns cached response on hit and calls underlying client on miss', async () => {
+    let callCount = 0
+    const fakeClient = {
+      chat: {
+        completions: {
+          create: async (params: { model: string; messages: Array<{ role: string; content: string }> }) => {
+            callCount++
+            return {
+              choices: [{ message: { content: 'Paris' }, finish_reason: 'stop' }],
+              usage: { prompt_tokens: 10, completion_tokens: 5 },
+              model: params.model,
+            }
+          },
+        },
+        // Extra property on chat -- must not be intercepted by wrap()
+        extra: { nested: 'value' },
+      },
+    }
+
+    const wrapped = cache.wrap(fakeClient)
+
+    // First call: cache miss → underlying client is called
+    const res1 = await wrapped.chat.completions.create({
+      model: 'gpt-4',
+      messages: [{ role: 'user', content: 'What is the capital of France?' }],
+    })
+    expect(callCount).toBe(1)
+    expect((res1 as { _cached?: boolean })._cached).toBeUndefined()
+    expect(
+      (res1 as { choices: Array<{ message: { content: string } }> }).choices[0].message.content
+    ).toBe('Paris')
+
+    // Second call with identical prompt: cache hit → underlying client NOT called
+    const res2 = await wrapped.chat.completions.create({
+      model: 'gpt-4',
+      messages: [{ role: 'user', content: 'What is the capital of France?' }],
+    })
+    expect(callCount).toBe(1) // still 1 — no extra call
+    expect((res2 as unknown as { _cached: boolean })._cached).toBe(true)
+    expect(
+      (res2 as { choices: Array<{ message: { content: string } }> }).choices[0].message.content
+    ).toBe('Paris')
+
+    // Extra property on chat must pass through unmodified
+    expect(fakeClient.chat.extra).toEqual({ nested: 'value' })
+  })
+
+  it('wrap(): does not intercept non-chat properties on the client', async () => {
+    const fakeClient = {
+      chat: {
+        completions: {
+          create: async () => ({
+            choices: [{ message: { content: 'ok' }, finish_reason: 'stop' }],
+            usage: { prompt_tokens: 1, completion_tokens: 1 },
+          }),
+        },
+      },
+      models: { list: () => 'model-list' },
+    }
+
+    const wrapped = cache.wrap(fakeClient)
+    // Non-chat properties must be returned as-is
+    expect(wrapped.models).toBe(fakeClient.models)
+  })
 })
