@@ -1,6 +1,6 @@
 {
   "name": "llm-semantic-cache",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Self-hosted semantic cache using local embeddings",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

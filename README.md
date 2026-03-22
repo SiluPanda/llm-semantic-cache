@@ -3,6 +3,7 @@
 Self-hosted semantic cache for LLM responses using cosine similarity search and LRU eviction. Zero runtime dependencies -- bring your own embedding function.
 
 [![npm version](https://img.shields.io/npm/v/llm-semantic-cache.svg)](https://www.npmjs.com/package/llm-semantic-cache)
+[![npm downloads](https://img.shields.io/npm/dt/llm-semantic-cache.svg)](https://www.npmjs.com/package/llm-semantic-cache)
 [![license](https://img.shields.io/npm/l/llm-semantic-cache.svg)](https://github.com/SiluPanda/llm-semantic-cache/blob/master/LICENSE)
 [![node](https://img.shields.io/node/v/llm-semantic-cache.svg)](https://nodejs.org/)
 
