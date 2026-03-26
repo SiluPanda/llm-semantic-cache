@@ -72,7 +72,7 @@ export async function createCache(options: SemanticCacheOptions): Promise<Semant
                           _cached: true,
                         }
                       }
-                      const result = await (t3 as Record<string, (...a: unknown[]) => unknown>)['create'](...args)
+                      const result = await (t3 as Record<string, (...a: unknown[]) => unknown>)['create'].call(t3, ...args)
                       const r = result as Record<string, unknown> | null
                       const content =
                         (r?.['choices'] as Array<{ message: { content: string } }> | undefined)?.[0]?.message?.content ?? ''
